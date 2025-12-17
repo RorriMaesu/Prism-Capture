@@ -1,0 +1,41 @@
+# Build outputs
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# Windows App SDK / MSIX build outputs
+**/AppPackages/
+**/BundleArtifacts/
+**/*.appx
+**/*.appxbundle
+**/*.msix
+**/*.msixbundle
+
+# Local artifacts
+recordings/
+*.part
+*.log
+
+# Secrets / certs (should not be committed)
+*.pfx
+*.p12
+*.pem
+*.key
+*.snk
+.env
+
+# OS
+Thumbs.db
+.DS_Store

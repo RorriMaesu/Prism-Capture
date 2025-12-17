@@ -1,0 +1,265 @@
+<Page
+    x:Class="ScreenRecorder.App.Views.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:ScreenRecorder.App.ViewModels"
+    mc:Ignorable="d"
+    Loaded="OnLoaded"
+    Background="Transparent">
+
+    <Page.DataContext>
+        <vm:MainViewModel x:Name="ViewModel" />
+    </Page.DataContext>
+
+    <Grid Padding="16" ColumnSpacing="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" /> <!-- Left: Source -->
+            <ColumnDefinition Width="*" />   <!-- Center: Action/Preview -->
+            <ColumnDefinition Width="300" /> <!-- Right: Config -->
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Column: Source Selection -->
+        <Border x:Name="LeftCard"
+                Grid.Column="0"
+                Style="{StaticResource CardSurface}">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Source" Style="{StaticResource SubtitleTextBlockStyle}" />
+                
+                <NavigationView PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed" SelectionChanged="OnSourceTabChanged">
+                    <NavigationView.MenuItems>
+                        <NavigationViewItem Content="Screen" Tag="Screen" IsSelected="True" />
+                        <NavigationViewItem Content="Window" Tag="Window" />
+                        <NavigationViewItem Content="Region" Tag="Region" />
+                    </NavigationView.MenuItems>
+                </NavigationView>
+
+                <Border Style="{StaticResource SubCardSurface}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Selected" Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{Binding SelectedSourceDisplay}" TextWrapping="WrapWholeWords" />
+                        <Button Content="Choose…" Command="{Binding PickCaptureSourceCommand}" Style="{StaticResource PrimaryAction}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Center Column: Preview & Action -->
+        <Grid Grid.Column="1" Padding="8" RowSpacing="16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Live Preview Placeholder -->
+            <Border x:Name="PreviewCard"
+                    Grid.Row="0"
+                    Background="Black"
+                    CornerRadius="{StaticResource CardCornerRadius}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <SwapChainPanel x:Name="PreviewPanel" />
+
+                    <!-- Drawing overlay (active during recording) -->
+                    <Canvas x:Name="DrawOverlay"
+                            Background="Transparent"
+                            IsHitTestVisible="False" />
+
+                    <!-- Region selection overlay (Region tab only) -->
+                    <Canvas x:Name="RegionOverlay"
+                            Visibility="{Binding RegionOverlayVisibility}"
+                            Background="Transparent">
+                        <Rectangle x:Name="RegionSelectionRect"
+                                   Visibility="Collapsed"
+                                   Stroke="White"
+                                   StrokeThickness="2"
+                                   Fill="#22000000" />
+
+                        <!-- Resize handles (shown when a region is selected) -->
+                        <Rectangle x:Name="HandleNW" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleN" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleNE" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleE" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleSE" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleS" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleSW" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+                        <Rectangle x:Name="HandleW" Visibility="Collapsed" Width="10" Height="10" Fill="White" />
+
+                        <TextBlock Text="Drag to select region"
+                                   Foreground="White"
+                                   Margin="12"
+                                   FontWeight="SemiBold" />
+                    </Canvas>
+
+                    <TextBlock Text="{Binding PreviewPlaceholderText}"
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               TextWrapping="Wrap" />
+                </Grid>
+            </Border>
+
+            <!-- Action Bar -->
+                <Border x:Name="ActionBarCard"
+                    Grid.Row="1"
+                    Style="{StaticResource CardSurface}"
+                    HorizontalAlignment="Center"
+                    MaxWidth="560">
+                <StackPanel Spacing="12">
+                <TextBlock Text="{Binding TimeEstimate}" HorizontalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
+                    <Button Command="{Binding RecordCommand}"
+                            Visibility="{Binding RecordButtonVisibility}"
+                            Background="{ThemeResource SystemFillColorCriticalBrush}"
+                            Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}"
+                            CornerRadius="32" 
+                            Width="140" Height="64">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7C8;" />
+                            <TextBlock Text="Record" FontWeight="Bold" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding RecordCommand}"
+                            Visibility="{Binding StopButtonVisibility}"
+                            CornerRadius="32"
+                            Width="140" Height="64">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE71A;" />
+                            <TextBlock Text="Stop" FontWeight="Bold" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
+                    <ComboBox x:Name="DrawToolCombo"
+                              Header="Draw"
+                              Width="180"
+                              IsEnabled="{Binding IsRecording}">
+                        <ComboBoxItem Content="Pen" />
+                        <ComboBoxItem Content="Arrow" />
+                        <ComboBoxItem Content="Highlighter" />
+                    </ComboBox>
+
+                    <Button x:Name="UndoDrawButton"
+                            Content="Undo"
+                            IsEnabled="{Binding IsRecording}" />
+                    <Button x:Name="ClearDrawButton"
+                            Content="Clear"
+                            IsEnabled="{Binding IsRecording}" />
+                </StackPanel>
+                
+                <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center" Style="{StaticResource CaptionTextBlockStyle}" />
+
+                <TextBlock Text="{Binding SaveLocationText}"
+                           HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="WrapWholeWords" />
+
+                <TextBlock Text="{Binding CurrentRecordingText}"
+                           HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="WrapWholeWords" />
+
+                <TextBlock Text="{Binding LastSavedText}"
+                           HorizontalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="WrapWholeWords" />
+
+                <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Padding="12">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="More from the developer"
+                                   Style="{StaticResource BodyStrongTextBlockStyle}"
+                                   HorizontalAlignment="Center" />
+
+                        <HyperlinkButton Content="MysticsMirror — AI-powered Vedic astrology"
+                                         Command="{Binding OpenMysticsMirrorCommand}"
+                                         HorizontalAlignment="Center" />
+                        <HyperlinkButton Content="Author page — Andrew J. Green"
+                                         Command="{Binding OpenAuthorCommand}"
+                                         HorizontalAlignment="Center" />
+                        <HyperlinkButton Content="GitHub repositories"
+                                         Command="{Binding OpenGithubCommand}"
+                                         HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+
+                <Button Content="Open output folder"
+                        Command="{Binding OpenOutputFolderCommand}"
+                    IsEnabled="{Binding CanOpenOutputFolder}"
+                    Style="{StaticResource Action}" />
+
+                <Button Content="Support this project"
+                    Command="{Binding DonateCommand}"
+                    Style="{StaticResource Action}" />
+
+                <Button Content="{Binding OpenSettingsButtonText}"
+                        Command="{Binding OpenSettingsCommand}"
+                        IsEnabled="{Binding CanOpenSettings}"
+                        Visibility="{Binding OpenSettingsButtonVisibility}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Right Column: Configuration -->
+        <Border x:Name="RightCard"
+                Grid.Column="2"
+                Style="{StaticResource CardSurface}">
+            <Grid RowSpacing="12">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Configuration" Style="{StaticResource SubtitleTextBlockStyle}" />
+
+                <StackPanel Grid.Row="1" Spacing="12">
+
+                <!-- Audio Mixer -->
+                <Expander Header="Audio Mixer" IsExpanded="False">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <TextBlock Text="Microphone" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                        <ComboBox HorizontalAlignment="Stretch" PlaceholderText="Select Mic..." />
+                        <ProgressBar Value="{Binding MicRms}" Maximum="1" Height="6" />
+                        <Slider Header="Gain" Minimum="0" Maximum="2" Value="{Binding MicGain, Mode=TwoWay}" />
+                        
+                        <TextBlock Text="System Audio" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="0,12,0,0" />
+                        <ComboBox HorizontalAlignment="Stretch" PlaceholderText="Default Output" />
+                        <ProgressBar Value="{Binding SystemRms}" Maximum="1" Height="6" />
+                        <Slider Header="Gain" Minimum="0" Maximum="2" Value="{Binding SystemGain, Mode=TwoWay}" />
+
+                        <ToggleSwitch Header="Monitoring" IsOn="{Binding IsMonitoring, Mode=TwoWay}" />
+                    </StackPanel>
+                </Expander>
+
+                <!-- Quality -->
+                <Expander Header="Quality" IsExpanded="False">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <ComboBox Header="Preset" HorizontalAlignment="Stretch" SelectedIndex="1">
+                            <ComboBoxItem Content="High Quality" />
+                            <ComboBoxItem Content="Balanced" />
+                            <ComboBoxItem Content="Performance" />
+                        </ComboBox>
+                        <ToggleSwitch Header="Hardware Encoding" IsOn="{Binding UseHardwareEncoding, Mode=TwoWay}" />
+                    </StackPanel>
+                </Expander>
+
+                <!-- Output -->
+                <Expander Header="Output" IsExpanded="False">
+                    <StackPanel Spacing="12" Padding="0,12,0,0">
+                        <TextBox Header="Save Location" Text="{Binding OutputFolder}" IsReadOnly="True" />
+                        <Button Content="Browse..." Command="{Binding PickOutputFolderCommand}" />
+                    </StackPanel>
+                </Expander>
+
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

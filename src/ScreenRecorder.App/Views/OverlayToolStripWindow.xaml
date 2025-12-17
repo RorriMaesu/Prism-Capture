@@ -1,0 +1,40 @@
+<Window
+    x:Class="ScreenRecorder.App.Views.OverlayToolStripWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Prism Capture">
+
+    <Border
+        x:Name="RootBorder"
+        Style="{StaticResource OverlayCardSurface}"
+        Padding="12,10"
+        CornerRadius="14">
+
+        <Grid ColumnSpacing="10" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <ToggleButton x:Name="DrawModeToggle" Content="Draw" Padding="12,8" CornerRadius="10" />
+                <ToggleButton x:Name="BubbleToggle" Content="Bubble" Padding="12,8" CornerRadius="10" />
+            </StackPanel>
+
+            <ComboBox x:Name="ToolCombo" Grid.Column="1" Width="160" VerticalAlignment="Center">
+                <ComboBoxItem Content="Pen" />
+                <ComboBoxItem Content="Arrow" />
+                <ComboBoxItem Content="Highlighter" />
+            </ComboBox>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button x:Name="UndoButton" Style="{StaticResource Action}" Content="Undo" />
+                <Button x:Name="ClearButton" Style="{StaticResource Action}" Content="Clear" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Prism Capture (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Prism Capture (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

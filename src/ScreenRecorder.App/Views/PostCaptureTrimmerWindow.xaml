@@ -1,0 +1,78 @@
+<Window
+    x:Class="ScreenRecorder.App.Views.PostCaptureTrimmerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="Prism Capture">
+
+    <Border
+        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+        BorderThickness="1"
+        CornerRadius="10"
+        Padding="16">
+
+        <Grid RowSpacing="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="12">
+                    <TextBlock x:Name="TitleText" FontSize="16" FontWeight="SemiBold" Text="Trim recording" />
+                    <TextBlock x:Name="FileText" Opacity="0.8" TextWrapping="Wrap" />
+
+                    <MediaPlayerElement x:Name="Player" AreTransportControlsEnabled="True" Height="300" />
+
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Timeline" />
+                        <Slider x:Name="TimelineSlider" Grid.Column="1" Minimum="0" Maximum="1" IsEnabled="False" ValueChanged="OnTimelineValueChanged" PointerPressed="OnTimelinePointerPressed" PointerReleased="OnTimelinePointerReleased" />
+                        <TextBlock x:Name="TimelineValueText" Grid.Column="2" VerticalAlignment="Center" Text="00:00 / 00:00" />
+                    </Grid>
+
+                    <Grid RowSpacing="8" ColumnSpacing="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Text="Trim start" />
+                        <Slider x:Name="StartTrimSlider" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="5" StepFrequency="0.25" ValueChanged="OnTrimValueChanged" />
+                        <TextBlock x:Name="StartTrimValueText" Grid.Row="0" Grid.Column="2" VerticalAlignment="Center" Text="0.00s" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Text="Trim end" />
+                        <Slider x:Name="EndTrimSlider" Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="5" StepFrequency="0.25" ValueChanged="OnTrimValueChanged" />
+                        <TextBlock x:Name="EndTrimValueText" Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Text="0.00s" />
+                    </Grid>
+
+                    <TextBlock x:Name="RangeText" Opacity="0.8" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="1" Spacing="8">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                    <ProgressRing x:Name="BusyRing" Width="20" Height="20" IsActive="False" Visibility="Collapsed" />
+                    <Button x:Name="SaveDefaultsButton" Content="Save defaults" Click="OnSaveDefaults" />
+                    <Button x:Name="KeepButton" Content="Keep as-is" Click="OnKeep" />
+                    <Button x:Name="TrimButton" Content="Trim &amp; Replace" Click="OnTrim" />
+                </StackPanel>
+
+                <TextBlock x:Name="StatusText" Foreground="{ThemeResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
