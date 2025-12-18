@@ -31,21 +31,20 @@
 - **Crash-safe output:** writes `*.mp4.part` and renames to `*.mp4` on clean stop
 - **Deep diagnostics:** persistent breadcrumbs log for end-to-end debugging
 
-## Table of contents
+## Quick install (no coding)
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [I just want to install (no coding)](#i-just-want-to-install-no-coding)
-- [Install on Windows 11 (Start menu app)](#install-on-windows-11-start-menu-app)
-- [Quick start (run from source)](#quick-start-run-from-source)
-- [Where recordings are saved](#where-recordings-are-saved)
-- [Logs / diagnostics](#logs--diagnostics)
-- [How the app works (architecture)](#how-the-app-works-architecture)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
-- [Maintainers](#maintainers)
-- [Support Prism Capture](#support-prism-capture)
-- [Repo layout](#repo-layout)
+You **do not** need Visual Studio or the .NET SDK to install.
+
+1. Go to https://github.com/RorriMaesu/Prism-Capture/releases/latest
+2. Download the zip for your PC:
+  - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
+  - **ARM devices:** `PrismCapture-<version>-win-arm64.zip`
+  - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
+3. Extract it anywhere (e.g. `Downloads\PrismCapture`)
+4. Double-click `InstallPrismCapture.cmd`
+5. Launch from Start → search **Prism Capture**
+
+If Windows blocks the installer: right-click → Properties → **Unblock**, then run again.
 
 ## Features
 
@@ -71,21 +70,14 @@
   - Release bundles/MSIX installs should already include FFmpeg.
   - For source builds, see [FFmpeg not found](#ffmpeg-not-found).
 
-## I just want to install (no coding)
+## Install (no coding)
 
 Download the latest installer bundle from **GitHub Releases**:
 
 - Latest release: https://github.com/RorriMaesu/Prism-Capture/releases/latest
 - All releases: https://github.com/RorriMaesu/Prism-Capture/releases
 
-Which download do I need?
-
-- If you're not sure, open **Settings → System → About** and check **System type**.
-  - “64-bit operating system” → download **x64**.
-  - “ARM-based processor” → download **arm64**.
-  - “32-bit operating system” → download **x86**.
-
-Then:
+If you're not sure which one you need, open **Settings → System → About** and check **System type**.
 
 1. Download the newest zip for your CPU:
    - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
@@ -441,4 +433,6 @@ Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\Pri
 ## Repo layout
 
 - `src/ScreenRecorder.App/` — main WinUI 3 application
-- `PLANNING.md` — original product planning doc and long-term direction
+- `scripts/` — install + publish automation
+- `appScreenshots/` — screenshots for docs
+- `recordings/` — local output folder (optional)
