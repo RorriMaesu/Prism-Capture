@@ -40,9 +40,11 @@
 - [Quick start (run from source)](#quick-start-run-from-source)
 - [Where recordings are saved](#where-recordings-are-saved)
 - [Logs / diagnostics](#logs--diagnostics)
+- [How the app works (architecture)](#how-the-app-works-architecture)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
 - [Support Prism Capture](#support-prism-capture)
+- [Repo layout](#repo-layout)
 
 ## Features
 
@@ -52,30 +54,6 @@
 - **Hardware encoding with fallback** (NVENC → QSV → AMF → software)
 - **Stable output workflow**: writes `*.mp4.part` then finalizes to `*.mp4`
 - **Windows 11 look & feel**: WinUI 3 + Mica/Acrylic + Fluent motion
-
-## Support Prism Capture
-
-Prism Capture is free, and I’d like to keep it that way.
-
-If it saved you time (or saved a recording from getting ruined), the simplest way to support ongoing work is a small donation:
-
-<a href="https://buymeacoffee.com/rorrimaesu">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="42" />
-</a>
-
-Suggested contributions (pick what feels fair):
-
-- **$3** — “This replaced a quick tool I used once”
-- **$10** — “This saved me a headache / rescued a take”
-- **$25** — “I use this regularly and want it to keep improving”
-
-What donations help pay for (honestly):
-
-- Time spent improving stability (capture edge cases, encoder fallbacks, “nothing happens” bugs)
-- Better UX polish and Windows 11-native fit and finish
-- More compatibility testing across GPUs/monitors/scaling setups
-
-Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\PrismCapture\breadcrumbs.log`) helps a lot.
 
 ## Requirements
 
@@ -95,16 +73,24 @@ Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\Pri
 
 Download the latest installer bundle from **GitHub Releases**:
 
-- https://github.com/RorriMaesu/Prism-Capture/releases
+- Latest release: https://github.com/RorriMaesu/Prism-Capture/releases/latest
+- All releases: https://github.com/RorriMaesu/Prism-Capture/releases
 
-If that page looks empty, it means **no release has been published yet** (the link is correct, but GitHub only shows content after you create a Release and upload assets).
+If you don’t see any `PrismCapture-<version>-win-*.zip` assets, you may be looking at a tag with no uploaded bundles yet.
+
+Which download do I need?
+
+- If you're not sure, open **Settings → System → About** and check **System type**.
+  - “64-bit operating system” → download **x64**.
+  - “ARM-based processor” → download **arm64**.
+  - “32-bit operating system” → download **x86**.
 
 Then:
 
 1. Download the newest zip for your CPU:
-  - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
-  - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
-  - **ARM devices (Surface Pro X, etc):** `PrismCapture-<version>-win-arm64.zip`
+   - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
+   - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
+   - **ARM devices (Surface Pro X, etc):** `PrismCapture-<version>-win-arm64.zip`
 2. Extract it anywhere (e.g. `Downloads\PrismCapture`)
 3. Double-click `InstallPrismCapture.cmd`
 4. Launch from Start → search **Prism Capture**
@@ -114,20 +100,22 @@ Notes:
 - If Windows blocks the script, right-click → Properties → **Unblock**, then run again.
 - If the release is signed with a self-signed/team certificate, the installer will import the included `PrismCapture_Distribution.cer` into your user trust stores.
 
-Maintainers: publish the first Release
+Maintainers: publish a Release
 
-1. Build the signed MSIX and create a friend-proof bundle zip:
+1. Build the signed MSIX and create friend-proof bundle zips:
 
 ```powershell
 # From the repo root
 $env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
 
 # Update -Version as needed (must be Major.Minor.Build.Revision)
-\scripts\PublishPrismCaptureMsix.ps1 -Platform x64 -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x64 -Zip
+\scripts\PublishPrismCaptureMsix.ps1 -Platform x64   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x64   -Zip
+\scripts\PublishPrismCaptureMsix.ps1 -Platform x86   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x86   -Zip
+\scripts\PublishPrismCaptureMsix.ps1 -Platform ARM64 -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-arm64 -Zip
 ```
 
 2. Go to GitHub → Releases → **Draft a new release**
-3. Upload the generated zip (example): `dist\PrismCapture-1.0.0.0-win-x64.zip`
+3. Upload the generated zips (x64/x86/arm64) from `dist\`
 
 If you don’t want to publish Releases, use the dev install flow in the next section.
 
@@ -237,8 +225,8 @@ If FFmpeg is not found, place `ffmpeg.exe` in the same folder as `PrismCapture.e
 If you want MSIX installs to work without relying on system `PATH`, you can bundle FFmpeg into the package.
 
 1. Put binaries here (not committed):
-  - `src\ScreenRecorder.App\External\ffmpeg\ffmpeg.exe`
-  - `src\ScreenRecorder.App\External\ffmpeg\ffprobe.exe` (optional)
+   - `src\ScreenRecorder.App\External\ffmpeg\ffmpeg.exe`
+   - `src\ScreenRecorder.App\External\ffmpeg\ffprobe.exe` (optional)
 2. Build/install the MSIX as usual (use the install script above, or the signed distribution flow below).
 
 Tip: for dev installs you can use `-InstallFfmpeg` (winget) or `-FfmpegPath` (no winget) and the installer will copy binaries into `src\ScreenRecorder.App\External\ffmpeg\` before building.
@@ -416,6 +404,30 @@ Yes. The app looks for `ffmpeg.exe` next to the executable first, and then falls
 ### Why does it create `*.mp4.part` files?
 
 This is intentional for crash-safety: the file is finalized and renamed to `*.mp4` on a clean stop.
+
+## Support Prism Capture
+
+Prism Capture is free, and I’d like to keep it that way.
+
+If it saved you time (or saved a recording from getting ruined), the simplest way to support ongoing work is a small donation:
+
+<a href="https://buymeacoffee.com/rorrimaesu">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="42" />
+</a>
+
+Suggested contributions (pick what feels fair):
+
+- **$3** — “This replaced a quick tool I used once”
+- **$10** — “This saved me a headache / rescued a take”
+- **$25** — “I use this regularly and want it to keep improving”
+
+What donations help pay for (honestly):
+
+- Time spent improving stability (capture edge cases, encoder fallbacks, “nothing happens” bugs)
+- Better UX polish and Windows 11-native fit and finish
+- More compatibility testing across GPUs/monitors/scaling setups
+
+Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\PrismCapture\breadcrumbs.log`) helps a lot.
 
 ## Repo layout
 
