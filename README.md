@@ -37,14 +37,31 @@ You **do not** need Visual Studio or the .NET SDK to install.
 
 1. Go to https://github.com/RorriMaesu/Prism-Capture/releases/latest
 2. Download the zip for your PC:
-  - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
-  - **ARM devices:** `PrismCapture-<version>-win-arm64.zip`
-  - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
+   - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
+   - **ARM devices:** `PrismCapture-<version>-win-arm64.zip`
+   - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
 3. Extract it anywhere (e.g. `Downloads\PrismCapture`)
 4. Double-click `InstallPrismCapture.cmd`
 5. Launch from Start → search **Prism Capture**
 
 If Windows blocks the installer: right-click → Properties → **Unblock**, then run again.
+
+<details>
+<summary>More install help (what to download, common install issues)</summary>
+
+Which download do I need?
+
+- Open **Settings → System → About** and check **System type**.
+  - “64-bit operating system” → **x64**
+  - “ARM-based processor” → **arm64**
+  - “32-bit operating system” → **x86**
+
+If installation fails:
+
+- If you see a certificate/trust error, re-run the installer as **Administrator**.
+- If sideloading is blocked, enable **Developer Mode** (Windows Settings → For developers) and retry.
+
+</details>
 
 ## Features
 
@@ -70,30 +87,8 @@ If Windows blocks the installer: right-click → Properties → **Unblock**, the
   - Release bundles/MSIX installs should already include FFmpeg.
   - For source builds, see [FFmpeg not found](#ffmpeg-not-found).
 
-## Install (no coding)
-
-Download the latest installer bundle from **GitHub Releases**:
-
-- Latest release: https://github.com/RorriMaesu/Prism-Capture/releases/latest
-- All releases: https://github.com/RorriMaesu/Prism-Capture/releases
-
-If you're not sure which one you need, open **Settings → System → About** and check **System type**.
-
-1. Download the newest zip for your CPU:
-   - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
-   - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
-   - **ARM devices (Surface Pro X, etc):** `PrismCapture-<version>-win-arm64.zip`
-2. Extract it anywhere (e.g. `Downloads\PrismCapture`)
-3. Double-click `InstallPrismCapture.cmd`
-4. Launch from Start → search **Prism Capture**
-
-Notes:
-
-- If Windows blocks the script, right-click → Properties → **Unblock**, then run again.
-- If the release is signed with a self-signed/team certificate, the installer will import the included `PrismCapture_Distribution.cer` into your user trust stores.
-- If installation fails due to app sideloading being blocked, enable **Developer Mode** (Windows Settings → For developers) and retry.
-
-Maintainers: see [Maintainers](#maintainers).
+<details>
+<summary>Developer install (Start menu app from source)</summary>
 
 ## Install on Windows 11 (Start menu app)
 
@@ -160,6 +155,11 @@ Uninstall (optional):
 ```powershell
 Get-AppxPackage -Name PrismCapture | Remove-AppxPackage
 ```
+
+</details>
+
+<details>
+<summary>Build/run from source</summary>
 
 ## Quick start (run from source)
 
@@ -234,6 +234,11 @@ Outputs land under:
 
 - `src\ScreenRecorder.App\AppPackages\...\*.msix`
 
+</details>
+
+<details>
+<summary>Maintainers</summary>
+
 ## Maintainers
 
 ### Publish a GitHub Release (zip bundles)
@@ -252,6 +257,8 @@ $env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
 
 2. Create a GitHub Release and upload the zips from `dist\`.
 
+</details>
+
 ## Where recordings are saved
 
 - Default output folder: your **Videos** folder (e.g. `C:\Users\<you>\Videos`).
@@ -268,6 +275,9 @@ A persistent breadcrumbs log is written to:
 - `%LOCALAPPDATA%\PrismCapture\breadcrumbs.log`
 
 This log is intended to make “nothing happens” issues diagnosable (FFmpeg resolution, picker results, capture start/stop, encoder failures, etc.).
+
+<details>
+<summary>Architecture notes</summary>
 
 ## How the app works (architecture)
 
@@ -340,6 +350,8 @@ This log is intended to make “nothing happens” issues diagnosable (FFmpeg re
   - Selects a screen first (same behavior as Screen).
   - Displays an overlay on the preview; you drag to select a rectangle.
   - The region is applied via FFmpeg `-vf crop=...`.
+
+  </details>
 
 ## Troubleshooting
 
