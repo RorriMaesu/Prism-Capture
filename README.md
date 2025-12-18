@@ -101,7 +101,10 @@ If that page looks empty, it means **no release has been published yet** (the li
 
 Then:
 
-1. Download the newest `PrismCapture-<version>-win-x64.zip` (or x86/arm64 if needed)
+1. Download the newest zip for your CPU:
+  - **Most PCs (Intel/AMD 64‑bit):** `PrismCapture-<version>-win-x64.zip`
+  - **32‑bit Windows:** `PrismCapture-<version>-win-x86.zip`
+  - **ARM devices (Surface Pro X, etc):** `PrismCapture-<version>-win-arm64.zip`
 2. Extract it anywhere (e.g. `Downloads\PrismCapture`)
 3. Double-click `InstallPrismCapture.cmd`
 4. Launch from Start → search **Prism Capture**
