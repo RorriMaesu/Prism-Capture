@@ -441,5 +441,4 @@ Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\Pri
 ## Repo layout
 
 - `src/ScreenRecorder.App/` — main WinUI 3 application
-- `prototype/` — early experiments and notes
 - `PLANNING.md` — original product planning doc and long-term direction
