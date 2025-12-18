@@ -97,6 +97,8 @@ Download the latest installer bundle from **GitHub Releases**:
 
 - https://github.com/RorriMaesu/Prism-Capture/releases
 
+If that page looks empty, it means **no release has been published yet** (the link is correct, but GitHub only shows content after you create a Release and upload assets).
+
 Then:
 
 1. Download the newest `PrismCapture-<version>-win-x64.zip` (or x86/arm64 if needed)
@@ -108,6 +110,23 @@ Notes:
 
 - If Windows blocks the script, right-click → Properties → **Unblock**, then run again.
 - If the release is signed with a self-signed/team certificate, the installer will import the included `PrismCapture_Distribution.cer` into your user trust stores.
+
+Maintainers: publish the first Release
+
+1. Build the signed MSIX and create a friend-proof bundle zip:
+
+```powershell
+# From the repo root
+$env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
+
+# Update -Version as needed (must be Major.Minor.Build.Revision)
+\scripts\PublishPrismCaptureMsix.ps1 -Platform x64 -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x64 -Zip
+```
+
+2. Go to GitHub → Releases → **Draft a new release**
+3. Upload the generated zip (example): `dist\PrismCapture-1.0.0.0-win-x64.zip`
+
+If you don’t want to publish Releases, use the dev install flow in the next section.
 
 ## Install on Windows 11 (Start menu app)
 
