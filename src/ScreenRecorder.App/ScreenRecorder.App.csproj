@@ -28,6 +28,9 @@
 
         <!-- Win2D requires a concrete platform (not AnyCPU) for correct native asset resolution in CLI builds. -->
         <Platform Condition="'$(Platform)'=='AnyCPU'">x86</Platform>
+        <PlatformTarget Condition="('$(PlatformTarget)'=='' or '$(PlatformTarget)'=='AnyCPU') and '$(Platform)'=='x64'">x64</PlatformTarget>
+        <PlatformTarget Condition="('$(PlatformTarget)'=='' or '$(PlatformTarget)'=='AnyCPU') and '$(Platform)'=='ARM64'">ARM64</PlatformTarget>
+        <PlatformTarget Condition="('$(PlatformTarget)'=='' or '$(PlatformTarget)'=='AnyCPU') and '$(Platform)'=='x86'">x86</PlatformTarget>
         <PlatformTarget Condition="'$(PlatformTarget)'=='' or '$(PlatformTarget)'=='AnyCPU'">x86</PlatformTarget>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <PublishProfile>win-$(Platform).pubxml</PublishProfile>

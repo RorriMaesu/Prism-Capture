@@ -72,12 +72,15 @@ function Get-LatestMsixFolder {
 function Write-PublicCerFromPfx {
     param(
         [Parameter(Mandatory = $true)][string]$PfxPath,
-        [Parameter(Mandatory = $true)][string]$PfxPasswordPlain,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$PfxPasswordPlain,
         [Parameter(Mandatory = $true)][string]$OutCerPath
     )
 
-    $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
-    $cert.Import($PfxPath, $PfxPasswordPlain, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::DefaultKeySet)
+    $cert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
+        $PfxPath,
+        $PfxPasswordPlain,
+        [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::DefaultKeySet
+    )
 
     $bytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
     [System.IO.File]::WriteAllBytes($OutCerPath, $bytes)
@@ -152,15 +155,21 @@ $props = @(
     "-p:PackageCertificatePassword=$PfxPasswordPlain"
 )
 
+# Ensure modern signing defaults (avoids signtool errors requiring /td and improves compatibility).
+$props += "-p:AppxPackageSigningDigestAlgorithm=SHA256"
+
 if ($TimestampUrl) {
     $props += "-p:AppxPackageSigningTimestampServerUrl=$TimestampUrl"
+    $props += "-p:AppxPackageSigningTimestampDigestAlgorithm=SHA256"
 }
 
 # The profile already sets Release + RID + GenerateAppxPackageOnBuild.
 # This will emit an .msix under src\ScreenRecorder.App\AppPackages\...
 
-dotnet publish $project @props |
-    Write-Output
+dotnet publish $project @props
+if ($LASTEXITCODE -ne 0) {
+    throw "dotnet publish failed with exit code $LASTEXITCODE"
+}
 
 $appPackages = Join-Path $repoRoot 'src\ScreenRecorder.App\AppPackages'
 
@@ -227,7 +236,7 @@ echo.
 echo Installed. Open Start and search for "Prism Capture".
 pause
 exit /b 0
-"'@
+'@
     Set-Content -LiteralPath (Join-Path $OutDir 'InstallPrismCapture.cmd') -Value $cmd -Encoding ASCII
 
     if ($Zip) {
