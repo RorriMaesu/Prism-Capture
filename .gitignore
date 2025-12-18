@@ -28,6 +28,13 @@ recordings/
 *.part
 *.log
 
+# Release bundle outputs (created by scripts/PublishPrismCaptureMsix.ps1 -OutDir ...)
+dist/
+release/
+PrismCapture-*.zip
+dist/*.zip
+release/*.zip
+
 # Secrets / certs (should not be committed)
 *.pfx
 *.p12

@@ -35,6 +35,7 @@
 
 - [Features](#features)
 - [Requirements](#requirements)
+- [I just want to install (no coding)](#i-just-want-to-install-no-coding)
 - [Install on Windows 11 (Start menu app)](#install-on-windows-11-start-menu-app)
 - [Quick start (run from source)](#quick-start-run-from-source)
 - [Where recordings are saved](#where-recordings-are-saved)
@@ -90,6 +91,24 @@ Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\Pri
     4) `ffmpeg` on `PATH` (launch probe)
   - For MSIX installs, bundling FFmpeg into the package is recommended.
 
+## I just want to install (no coding)
+
+Download the latest installer bundle from **GitHub Releases**:
+
+- https://github.com/RorriMaesu/Prism-Capture/releases
+
+Then:
+
+1. Download the newest `PrismCapture-<version>-win-x64.zip` (or x86/arm64 if needed)
+2. Extract it anywhere (e.g. `Downloads\PrismCapture`)
+3. Double-click `InstallPrismCapture.cmd`
+4. Launch from Start → search **Prism Capture**
+
+Notes:
+
+- If Windows blocks the script, right-click → Properties → **Unblock**, then run again.
+- If the release is signed with a self-signed/team certificate, the installer will import the included `PrismCapture_Distribution.cer` into your user trust stores.
+
 ## Install on Windows 11 (Start menu app)
 
 This repo includes a dev install script that builds an **MSIX** and installs it so Prism Capture shows up in the **Start menu** like a normal Windows app.
@@ -99,6 +118,12 @@ Prereqs (one-time):
 - Install the **.NET SDK 8.x**
 - Clone this repo locally
 - Windows Settings → **Privacy & security** → **For developers** → enable **Developer Mode** (required for dev-signed MSIX installs)
+
+Fastest path (recommended):
+
+- Double-click `InstallPrismCaptureMsix.cmd`
+  - Installs a Debug MSIX by default
+  - Launch from Start → search **Prism Capture**
 
 From the repo root (PowerShell):
 
@@ -114,6 +139,8 @@ Notes:
 
 - The installer script creates a dev signing certificate and installs the MSIX.
 - If installation fails with certificate trust (0x800B0109), re-run the install script from an **elevated** PowerShell (Run as Administrator).
+- After install: Start → search **Prism Capture** → right-click → **Pin to Start** / **Pin to taskbar**.
+- To update to the latest code later: re-run the installer with `-Force`.
 
 ### Install + bundle FFmpeg (recommended)
 
@@ -136,6 +163,11 @@ If you **don't** have winget, download/extract FFmpeg and pass explicit paths:
 Or double-click:
 
 - `InstallPrismCaptureMsix.cmd`
+
+Examples:
+
+- Install Release: `InstallPrismCaptureMsix.cmd Release -Platform x64`
+- Install Release + bundle FFmpeg: `InstallPrismCaptureMsix.cmd Release -Platform x64 -InstallFfmpeg`
 
 Uninstall (optional):
 
