@@ -43,6 +43,7 @@
 - [How the app works (architecture)](#how-the-app-works-architecture)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
+- [Maintainers](#maintainers)
 - [Support Prism Capture](#support-prism-capture)
 - [Repo layout](#repo-layout)
 
@@ -57,17 +58,18 @@
 
 ## Requirements
 
+### To install (from GitHub Releases)
+
 - Windows 11 (recommended) or Windows 10 with Windows Graphics Capture support
-  - Project target: `net8.0-windows10.0.19041.0`
+
+### To build/run from source
+
 - .NET SDK 8.x
 - Optional: Visual Studio 2022 (for the easiest WinUI dev experience)
+- Project target: `net8.0-windows10.0.19041.0`
 - FFmpeg (required for recording)
-  - The app resolves FFmpeg in this order:
-    1) `AppContext.BaseDirectory\ffmpeg.exe`
-    2) `AppContext.BaseDirectory\External\ffmpeg\ffmpeg.exe` (how MSIX bundling lands by default)
-    3) `PRISMCAPTURE_FFMPEG` (or `SCREENRECORDER_FFMPEG` / `FFMPEG_PATH`) environment variable
-    4) `ffmpeg` on `PATH` (launch probe)
-  - For MSIX installs, bundling FFmpeg into the package is recommended.
+  - Release bundles/MSIX installs should already include FFmpeg.
+  - For source builds, see [FFmpeg not found](#ffmpeg-not-found).
 
 ## I just want to install (no coding)
 
@@ -75,8 +77,6 @@ Download the latest installer bundle from **GitHub Releases**:
 
 - Latest release: https://github.com/RorriMaesu/Prism-Capture/releases/latest
 - All releases: https://github.com/RorriMaesu/Prism-Capture/releases
-
-If you don’t see any `PrismCapture-<version>-win-*.zip` assets, you may be looking at a tag with no uploaded bundles yet.
 
 Which download do I need?
 
@@ -99,25 +99,9 @@ Notes:
 
 - If Windows blocks the script, right-click → Properties → **Unblock**, then run again.
 - If the release is signed with a self-signed/team certificate, the installer will import the included `PrismCapture_Distribution.cer` into your user trust stores.
+- If installation fails due to app sideloading being blocked, enable **Developer Mode** (Windows Settings → For developers) and retry.
 
-Maintainers: publish a Release
-
-1. Build the signed MSIX and create friend-proof bundle zips:
-
-```powershell
-# From the repo root
-$env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
-
-# Update -Version as needed (must be Major.Minor.Build.Revision)
-\scripts\PublishPrismCaptureMsix.ps1 -Platform x64   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x64   -Zip
-\scripts\PublishPrismCaptureMsix.ps1 -Platform x86   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x86   -Zip
-\scripts\PublishPrismCaptureMsix.ps1 -Platform ARM64 -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-arm64 -Zip
-```
-
-2. Go to GitHub → Releases → **Draft a new release**
-3. Upload the generated zips (x64/x86/arm64) from `dist\`
-
-If you don’t want to publish Releases, use the dev install flow in the next section.
+Maintainers: see [Maintainers](#maintainers).
 
 ## Install on Windows 11 (Start menu app)
 
@@ -258,6 +242,24 @@ Outputs land under:
 
 - `src\ScreenRecorder.App\AppPackages\...\*.msix`
 
+## Maintainers
+
+### Publish a GitHub Release (zip bundles)
+
+1. Build signed MSIX bundles (x64/x86/arm64) and zip them:
+
+```powershell
+# From the repo root
+$env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
+
+# Update -Version as needed (must be Major.Minor.Build.Revision)
+\scripts\PublishPrismCaptureMsix.ps1 -Platform x64   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x64   -Zip
+\scripts\PublishPrismCaptureMsix.ps1 -Platform x86   -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-x86   -Zip
+\scripts\PublishPrismCaptureMsix.ps1 -Platform ARM64 -Version 1.0.0.0 -OutDir .\dist\PrismCapture-1.0.0.0-win-arm64 -Zip
+```
+
+2. Create a GitHub Release and upload the zips from `dist\`.
+
 ## Where recordings are saved
 
 - Default output folder: your **Videos** folder (e.g. `C:\Users\<you>\Videos`).
@@ -364,6 +366,13 @@ Check `%LOCALAPPDATA%\PrismCapture\breadcrumbs.log` for `PickCaptureSourceAsync`
 - For MSIX installs: prefer bundling FFmpeg using the install script:
   - `-InstallFfmpeg` (winget), or
   - `-FfmpegPath` / `-FfprobePath` (no winget).
+
+FFmpeg resolution order:
+
+1) `AppContext.BaseDirectory\ffmpeg.exe`
+2) `AppContext.BaseDirectory\External\ffmpeg\ffmpeg.exe` (how MSIX bundling lands by default)
+3) `PRISMCAPTURE_FFMPEG` (or `SCREENRECORDER_FFMPEG` / `FFMPEG_PATH`) environment variable
+4) `ffmpeg` on `PATH` (launch probe)
 
 ### MSIX install fails with certificate trust (0x800B0109)
 
