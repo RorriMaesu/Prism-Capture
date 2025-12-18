@@ -35,7 +35,8 @@
 
 - [Features](#features)
 - [Requirements](#requirements)
-- [Quick start (run the app)](#quick-start-run-the-app)
+- [Install on Windows 11 (Start menu app)](#install-on-windows-11-start-menu-app)
+- [Quick start (run from source)](#quick-start-run-from-source)
 - [Where recordings are saved](#where-recordings-are-saved)
 - [Logs / diagnostics](#logs--diagnostics)
 - [Troubleshooting](#troubleshooting)
@@ -77,13 +78,72 @@ Prefer not to donate? A **star** and a good bug report (with `%LOCALAPPDATA%\Pri
 
 ## Requirements
 
-- Windows 10+ with Windows Graphics Capture support
+- Windows 11 (recommended) or Windows 10 with Windows Graphics Capture support
   - Project target: `net8.0-windows10.0.19041.0`
 - .NET SDK 8.x
-- FFmpeg
-  - The app looks for `ffmpeg.exe` next to the app executable first, otherwise tries launching `ffmpeg` from `PATH`.
+- Optional: Visual Studio 2022 (for the easiest WinUI dev experience)
+- FFmpeg (required for recording)
+  - The app resolves FFmpeg in this order:
+    1) `AppContext.BaseDirectory\ffmpeg.exe`
+    2) `AppContext.BaseDirectory\External\ffmpeg\ffmpeg.exe` (how MSIX bundling lands by default)
+    3) `PRISMCAPTURE_FFMPEG` (or `SCREENRECORDER_FFMPEG` / `FFMPEG_PATH`) environment variable
+    4) `ffmpeg` on `PATH` (launch probe)
+  - For MSIX installs, bundling FFmpeg into the package is recommended.
 
-## Quick start (run the app)
+## Install on Windows 11 (Start menu app)
+
+This repo includes a dev install script that builds an **MSIX** and installs it so Prism Capture shows up in the **Start menu** like a normal Windows app.
+
+Prereqs (one-time):
+
+- Install the **.NET SDK 8.x**
+- Clone this repo locally
+- Windows Settings → **Privacy & security** → **For developers** → enable **Developer Mode** (required for dev-signed MSIX installs)
+
+From the repo root (PowerShell):
+
+```powershell
+# Example:
+# cd C:\dev\ScreenRecorder
+
+# Release x64 dev install (most Windows 11 PCs)
+.\scripts\InstallPrismCaptureMsix.ps1 -Configuration Release -Platform x64 -Force
+```
+
+Notes:
+
+- The installer script creates a dev signing certificate and installs the MSIX.
+- If installation fails with certificate trust (0x800B0109), re-run the install script from an **elevated** PowerShell (Run as Administrator).
+
+### Install + bundle FFmpeg (recommended)
+
+Bundling makes the installed app record without relying on system PATH.
+
+If you have winget:
+
+```powershell
+.\scripts\InstallPrismCaptureMsix.ps1 -Configuration Release -Platform x64 -InstallFfmpeg -Force
+```
+
+If you **don't** have winget, download/extract FFmpeg and pass explicit paths:
+
+```powershell
+.\scripts\InstallPrismCaptureMsix.ps1 -Configuration Release -Platform x64 -Force `
+  -FfmpegPath "C:\path\to\ffmpeg.exe" `
+  -FfprobePath "C:\path\to\ffprobe.exe"  # optional
+```
+
+Or double-click:
+
+- `InstallPrismCaptureMsix.cmd`
+
+Uninstall (optional):
+
+```powershell
+Get-AppxPackage -Name PrismCapture | Remove-AppxPackage
+```
+
+## Quick start (run from source)
 
 ### Option A — Visual Studio (recommended)
 
@@ -117,6 +177,44 @@ After a successful build, launch the generated exe (path varies by platform):
 ```
 
 If FFmpeg is not found, place `ffmpeg.exe` in the same folder as `PrismCapture.exe` or install FFmpeg and ensure it’s available on `PATH`.
+
+### Bundle FFmpeg into the MSIX (manual)
+
+If you want MSIX installs to work without relying on system `PATH`, you can bundle FFmpeg into the package.
+
+1. Put binaries here (not committed):
+  - `src\ScreenRecorder.App\External\ffmpeg\ffmpeg.exe`
+  - `src\ScreenRecorder.App\External\ffmpeg\ffprobe.exe` (optional)
+2. Build/install the MSIX as usual (use the install script above, or the signed distribution flow below).
+
+Tip: for dev installs you can use `-InstallFfmpeg` (winget) or `-FfmpegPath` (no winget) and the installer will copy binaries into `src\ScreenRecorder.App\External\ffmpeg\` before building.
+
+At runtime the app prefers `ffmpeg.exe` next to the app executable (`AppContext.BaseDirectory`), then `External\ffmpeg\ffmpeg.exe` (the default MSIX-bundled layout).
+
+### Option E — Build a signed Release MSIX (team distribution)
+
+This produces a **signed** Release MSIX using a dedicated publish profile (`msix-x64` / `msix-x86` / `msix-arm64`).
+
+Prereqs:
+
+- Create/import a code-signing certificate as a `.pfx`.
+- Ensure the certificate **Subject** matches the `Publisher` in `src\ScreenRecorder.App\Package.appxmanifest`.
+- Put the `.pfx` at `certs\PrismCapture_Distribution.pfx` (this repo ignores `*.pfx`).
+
+Build (PowerShell):
+
+```powershell
+# Option 1: use env var for the password
+$env:PRISMCAPTURE_PFX_PASSWORD = "<pfx-password>"
+.\scripts\PublishPrismCaptureMsix.ps1 -Platform x64 -Version 1.0.0.0
+
+# Option 2: omit password and you will be prompted
+.\scripts\PublishPrismCaptureMsix.ps1 -Platform x64 -Version 1.0.0.0
+```
+
+Outputs land under:
+
+- `src\ScreenRecorder.App\AppPackages\...\*.msix`
 
 ## Where recordings are saved
 
@@ -220,8 +318,19 @@ Check `%LOCALAPPDATA%\PrismCapture\breadcrumbs.log` for `PickCaptureSourceAsync`
 
 ### FFmpeg not found
 
-- Put `ffmpeg.exe` next to the built `PrismCapture.exe`, or
-- Install FFmpeg and ensure `ffmpeg` runs from a normal terminal `PATH`.
+- For source builds: put `ffmpeg.exe` next to the built `PrismCapture.exe`, or install FFmpeg and ensure `ffmpeg` runs from a normal terminal `PATH`.
+- For MSIX installs: prefer bundling FFmpeg using the install script:
+  - `-InstallFfmpeg` (winget), or
+  - `-FfmpegPath` / `-FfprobePath` (no winget).
+
+### MSIX install fails with certificate trust (0x800B0109)
+
+- Re-run the install script from an elevated PowerShell (Run as Administrator) so it can trust the dev certificate machine-wide.
+- Ensure Developer Mode is enabled (Windows Settings → For developers).
+
+### VS Code shows `http://_vscodecontentref_/...` in copied commands
+
+If you copied a clickable link from a preview/summary, re-run using the literal script path (for example: `.\scripts\InstallPrismCaptureMsix.ps1`).
 
 ### Hardware encoder fails
 

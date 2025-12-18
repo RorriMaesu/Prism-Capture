@@ -35,6 +35,15 @@
         <RuntimeIdentifiers Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) &lt; 8">win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     </PropertyGroup>
 
+    <!--
+      MSIX packaging runs a publish-like pipeline. Trimming breaks WinUI/XAML activation
+      because types referenced only from XAML can be trimmed, causing the packaged app to
+      fail to launch.
+    -->
+    <PropertyGroup Condition="'$(WindowsPackageType)'=='MSIX'">
+        <PublishTrimmed>false</PublishTrimmed>
+    </PropertyGroup>
+
     <ItemGroup>
         <Content Include="Assets\SplashScreen.scale-200.png" />
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -43,6 +52,26 @@
         <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
         <Content Include="Assets\StoreLogo.png" />
         <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    </ItemGroup>
+
+    <!--
+      Optional: bundle FFmpeg into the app output / MSIX.
+      Place binaries here (not committed):
+        External\ffmpeg\ffmpeg.exe
+        External\ffmpeg\ffprobe.exe (optional)
+            Runtime resolution prefers AppContext.BaseDirectory\ffmpeg.exe, then External\ffmpeg\ffmpeg.exe.
+    -->
+    <ItemGroup Condition="Exists('External\\ffmpeg\\ffmpeg.exe')">
+        <Content Include="External\ffmpeg\ffmpeg.exe">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
+    <ItemGroup Condition="Exists('External\\ffmpeg\\ffprobe.exe')">
+        <Content Include="External\ffmpeg\ffprobe.exe">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

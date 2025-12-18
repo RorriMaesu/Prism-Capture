@@ -24,6 +24,21 @@ namespace ScreenRecorder.App
 
             Breadcrumbs.Session("App: ctor");
             Breadcrumbs.Write($"BaseDirectory: {AppContext.BaseDirectory}");
+
+            // Packaged (MSIX) desktop apps commonly start with CurrentDirectory = System32.
+            // Use a stable, writable directory to reduce surprises when launching child processes.
+            try
+            {
+                var wd = System.IO.Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "PrismCapture");
+                System.IO.Directory.CreateDirectory(wd);
+                Environment.CurrentDirectory = wd;
+            }
+            catch
+            {
+            }
+
             try { Breadcrumbs.Write($"CurrentDirectory: {Environment.CurrentDirectory}"); } catch { }
 
             try

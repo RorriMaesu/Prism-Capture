@@ -36,6 +36,16 @@ recordings/
 *.snk
 .env
 
+# Optional bundled FFmpeg binaries (drop locally; do not commit)
+src/ScreenRecorder.App/External/ffmpeg/*.exe
+
+# Local search outputs (created during setup/troubleshooting)
+_ffmpeg_*.txt
+_ffprobe_*.txt
+
+# Generated dev signing certificate export (created by scripts/InstallPrismCaptureMsix.ps1)
+certs/PrismCapture_Dev.cer
+
 # OS
 Thumbs.db
 .DS_Store

@@ -58,9 +58,12 @@ internal sealed class FfmpegAvMuxer : IDisposable
 
         Breadcrumbs.Write($"IsFfmpegAvailable: failed (probeError={probeError ?? "<null>"})");
 
+        // Note: for MSIX installs, the app install folder is read-only, so "place next to the executable"
+        // generally isn't feasible. Prefer PATH or PRISMCAPTURE_FFMPEG, or bundle ffmpeg into the MSIX.
+        var help = "Recording requires FFmpeg. Install FFmpeg and ensure `ffmpeg` is on PATH, or set PRISMCAPTURE_FFMPEG to the full path of ffmpeg.exe. For MSIX installs you can also bundle ffmpeg.exe into the package.";
         message = string.IsNullOrWhiteSpace(probeError)
-            ? "ffmpeg not found. Install ffmpeg and add it to PATH, or place ffmpeg.exe next to the app executable."
-            : $"ffmpeg not found or not runnable ({probeError}). Install ffmpeg and add it to PATH, or place ffmpeg.exe next to the app executable.";
+            ? help
+            : $"{help} ({probeError})";
         return false;
     }
 
@@ -78,6 +81,18 @@ internal sealed class FfmpegAvMuxer : IDisposable
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
+
+            // Avoid confusing "working directory System32" errors for MSIX-installed apps.
+            try
+            {
+                var wd = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PrismCapture");
+                Directory.CreateDirectory(wd);
+                psi.WorkingDirectory = wd;
+            }
+            catch
+            {
+                // best-effort
+            }
 
             using var p = Process.Start(psi);
             if (p is null)
@@ -602,6 +617,14 @@ internal sealed class FfmpegAvMuxer : IDisposable
             if (File.Exists(local))
             {
                 return local;
+            }
+
+            // MSIX builds may preserve folder structure for bundled tools.
+            // (The installer bundles under src\ScreenRecorder.App\External\ffmpeg\.)
+            var bundled = Path.Combine(AppContext.BaseDirectory, "External", "ffmpeg", "ffmpeg.exe");
+            if (File.Exists(bundled))
+            {
+                return bundled;
             }
         }
         catch

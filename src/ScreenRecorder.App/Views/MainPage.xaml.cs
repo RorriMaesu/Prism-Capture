@@ -1031,16 +1031,16 @@ namespace ScreenRecorder.App.Views
                     if (item is null)
                     {
                         Breadcrumbs.Write("MainPage: record aborted - no SelectedCaptureItem");
-                        vm.StatusMessage = "No capture item selected.";
                         vm.IsRecording = false;
+                        vm.StatusMessage = "No capture source selected. Click Choose… first.";
                         return;
                     }
 
                     if (!string.Equals(vm.SelectedCaptureTab, vm.SelectedTab, StringComparison.OrdinalIgnoreCase))
                     {
                         Breadcrumbs.Write($"MainPage: record aborted - selection tab mismatch selected={vm.SelectedCaptureTab} current={vm.SelectedTab}");
-                        vm.StatusMessage = "Choose a source for the current tab.";
                         vm.IsRecording = false;
+                        vm.StatusMessage = "Choose a source for the current tab.";
                         _preview?.Start(item);
                         return;
                     }
@@ -1049,8 +1049,8 @@ namespace ScreenRecorder.App.Views
                         && vm.SelectedRegion is null)
                     {
                         Breadcrumbs.Write("MainPage: record aborted - Region tab but no SelectedRegion");
-                        vm.StatusMessage = "Choose a region first (drag on preview).";
                         vm.IsRecording = false;
+                        vm.StatusMessage = "Choose a region first (drag on preview).";
                         _preview?.Start(item);
                         return;
                     }
@@ -1058,8 +1058,8 @@ namespace ScreenRecorder.App.Views
                     if (!ScreenRecorder.App.Services.Ffmpeg.FfmpegAvMuxer.IsFfmpegAvailable(out _, out var ffmpegMsg))
                     {
                         Breadcrumbs.Write($"MainPage: record aborted - ffmpeg not available ({ffmpegMsg})");
-                        vm.StatusMessage = ffmpegMsg ?? "ffmpeg not available.";
                         vm.IsRecording = false;
+                        vm.StatusMessage = ffmpegMsg ?? "FFmpeg not available.";
                         if (vm.SelectedCaptureItem is not null)
                         {
                             _preview?.Start(vm.SelectedCaptureItem);
@@ -1075,8 +1075,8 @@ namespace ScreenRecorder.App.Views
                         if (drive.AvailableFreeSpace < 500L * 1024L * 1024L)
                         {
                             Breadcrumbs.Write($"MainPage: record aborted - low disk space free={drive.AvailableFreeSpace}");
-                            vm.StatusMessage = "Not enough disk space (<500MB).";
                             vm.IsRecording = false;
+                            vm.StatusMessage = "Not enough disk space (<500MB).";
                             return;
                         }
                     }
